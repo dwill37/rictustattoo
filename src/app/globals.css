@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/*
+ * Rictus palette: warm ink black from the logo's background, cream type,
+ * and one accent, the magenta of the logo's smoke. "grin-deep" is the same
+ * hue darkened for text on cream (WCAG AA).
+ */
+@theme {
+  --color-ink: #100c11;
+  --color-ink-2: #1a1419;
+  --color-ink-3: #261d25;
+  --color-cream: #f4ecdf;
+  --color-cream-2: #e9dfcf;
+  --color-mute: #b8ab9e;
+  --color-grin: #e65fd6;
+  --color-grin-deep: #a92a9c;
+  --color-line: rgb(244 236 223 / 0.12);
+
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-wink: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --ease-precise: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --radius-card: 1.75rem;
+  --radius-tile: 1.25rem;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    background: var(--color-ink);
+    color: var(--color-cream);
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-ink);
+    overflow-x: clip;
+  }
+
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  ::selection {
+    background: var(--color-grin);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-grin);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@layer components {
+  .display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    font-variation-settings: "opsz" 96;
+    text-wrap: balance;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: 88rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  /* Highlights unfilled [PLACEHOLDER: ...] copy so it can't ship unnoticed. */
+  .ph {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.82em;
+    letter-spacing: 0;
+    font-weight: 500;
+    color: var(--color-grin);
+    background: rgb(230 95 214 / 0.08);
+    outline: 1px dashed rgb(230 95 214 / 0.55);
+    outline-offset: 1px;
+    border-radius: 4px;
+    padding: 0.05em 0.3em;
+    overflow-wrap: anywhere;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .on-cream .ph {
+    color: var(--color-grin-deep);
+    background: rgb(169 42 156 / 0.07);
+    outline-color: rgb(169 42 156 / 0.5);
+  }
+
+  /* Hero headline: CSS-driven so it is readable before hydration. */
+  .mask-word {
+    display: inline-block;
+    overflow: clip;
+    overflow-clip-margin: 0.12em;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+    vertical-align: top;
+  }
+  .mask-word > span {
+    display: inline-block;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mask-word > span {
+      animation: word-rise 0.9s var(--ease-wink) both;
+      animation-delay: calc(var(--i) * 70ms + 250ms);
+    }
+    .fade-rise {
+      animation: fade-rise 0.8s var(--ease-precise) both;
+      animation-delay: var(--d, 900ms);
+    }
+  }
+}
+
+/* Opacity is part of the reveal on purpose: Chrome only counts text toward
+   LCP once it becomes visible, never if it starts shifted out of its mask. */
+@keyframes word-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 70%, 0) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Film grain, fixed and non-interactive so it never repaints on scroll. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Safety net: reveal elements are server-rendered in their "hidden" state
+   before JS knows the motion preference. Force them visible when reduced. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+}
